@@ -7,30 +7,30 @@ Imada の フォースゲージのドライバとなるクラス
 
 import serial
 import time
-import sys
+from absl import app
+from absl import flags
 
 from forcegauge import ForceGauge
 
-if __name__=="__main__":
+FLAGS = flags.FLAGS
+flags.DEFINE_string("serial_port", None, "Serial port")
+flags.DEFINE_integer("print_rate", 10, "Print rate in Hz")
 
-    if len( sys.argv ) < 2:
-        print("print force gauge data")
-        print("usage:program <serial port> <print rate (optional default: 10Hz)>")
+def main(argv):
+    if FLAGS.serial_port is None:
+        print("Serial port not provided. Usage: program --serial_port=<serial port> [--print_rate=<print rate>]")
         sys.exit(1)
 
-    a = ForceGauge( sys.argv[1] )
-    if len( sys.argv ) > 2:
-        try:
-            rate = int(sys.argv[2])
-        except:
-            rate = 10
-    else:
-        rate = 10
+    a = ForceGauge(FLAGS.serial_port)
+    rate = FLAGS.print_rate
     dt = 1.0 / rate
 
     try:
         while True:
-            print( str(a.read()) )
+            print(str(a.read()))
             time.sleep(dt)
     except KeyboardInterrupt:
         del a
+
+if __name__ == "__main__":
+    app.run(main)
